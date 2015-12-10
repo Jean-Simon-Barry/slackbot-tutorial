@@ -64,10 +64,10 @@ module.exports = (robot) ->
   ###
   # .* = matches anything; we access the entire matching string using match[0]
   # for using regex, use this tool: http://regexpal.com/
-  robot.hear /.*!.*/, (msg) ->
+  #robot.hear /.*!.*/, (msg) ->
     # send back the same message
     # reply prefixes the user's name in front of the text
-    msg.reply msg.match[0]
+    #msg.reply msg.match[0]
 
   ###
   # Example of building an external endpoint (that lives on your heroku app) for others things to trigger your bot to do stuff
@@ -95,6 +95,7 @@ module.exports = (robot) ->
       # removing the @ symbol
       room: get_username(msg).slice(1),
       source: 'use of the bug me command'
+      user: get_username(msg)
     }
 
   ###
@@ -105,7 +106,7 @@ module.exports = (robot) ->
   robot.on "bug-me", (data) ->
     try
       # this will do a private message if the "data.room" variable is the user id of a person
-      robot.messageRoom data.room, 'This is a custom message due to ' + data.source
+      robot.messageRoom data.room, 'This is a custom message due to ' + data.source + ' from ' + data.user
     catch error
 
   ###
@@ -121,4 +122,34 @@ module.exports = (robot) ->
   # uncomment to test this
   # robot.catchAll (response) ->
   #   console.log('catch all: ', response)
+  
+  robot.respond /you are a little slow/, (res) ->
+     setTimeout () ->
+       res.send "Who you calling 'slow'?"
+     , 60 * 1000
 
+  robot.respond /what is the answer to the ultimate question of life/, (res) ->
+     unless answer?
+       res.send "Missing HUBOT_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING in environment: please set and try again"
+       return
+     res.send "#{answer}, but what is the question?"
+	 
+  annoyIntervalId = null
+  
+  robot.respond /annoy me/, (res) ->
+     if annoyIntervalId
+       res.send "AAAAAAAAAAAEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIHHHHHHHHHH"
+       return
+  
+     res.send "Hey, want to hear the most annoying sound in the world?"
+     annoyIntervalId = setInterval () ->
+       res.send "AAAAAAAAAAAEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIHHHHHHHHHH"
+     , 1000
+	 
+  robot.respond /unannoy me/, (res) ->
+     if annoyIntervalId
+       res.send "GUYS, GUYS, GUYS!"
+       clearInterval(annoyIntervalId)
+       annoyIntervalId = null
+     else
+       res.send "Not annoying you right now, am I?"
